@@ -46,9 +46,26 @@ const MIN_FRAME_INTERVAL = 1000 / 15;
 // ========== Init ==========
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
+    // Telegram Web App init
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+        tg.ready();
+        tg.expand();
+        tg.isVerticalSwipesEnabled = false;
+
+        // Set CSS variable for TG header offset
+        const updateTgTop = () => {
+            const top = tg.contentSafeAreaInset?.top || 0;
+            const headerHeight = tg.headerColor ? 0 : 0; // TG handles its own header
+            document.documentElement.style.setProperty('--tg-top', `${top + 56}px`);
+        };
+        updateTgTop();
+        tg.onEvent('viewportChanged', updateTgTop);
+    } else {
+        // Not in Telegram — use safe area insets
+        document.documentElement.style.setProperty('--tg-top',
+            `max(${getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-top)') || '0px'}, 16px)`
+        );
     }
 
     videoEl = document.getElementById('camera-feed');
