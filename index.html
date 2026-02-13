@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FitToScroll</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <div class="loading-text">Загрузка модели позы...</div>
+    </div>
+
+    <!-- Exercise Menu Screen -->
+    <div id="screen-menu" class="screen active">
+        <div class="menu-header">
+            <h1 class="menu-title">FitToScroll</h1>
+            <p class="menu-subtitle">Выбери упражнение</p>
+        </div>
+        <div class="menu-cards">
+            <button class="exercise-card" data-exercise="squats">
+                <div class="card-icon">🏋️</div>
+                <div class="card-text">
+                    <span class="card-name">Приседания</span>
+                    <span class="card-desc">Детекция позы через камеру</span>
+                </div>
+                <div class="card-chevron">›</div>
+            </button>
+            <button class="exercise-card" data-exercise="pushUps">
+                <div class="card-icon">💪</div>
+                <div class="card-text">
+                    <span class="card-name">Отжимания</span>
+                    <span class="card-desc">Детекция позы через камеру</span>
+                </div>
+                <div class="card-chevron">›</div>
+            </button>
+            <button class="exercise-card" data-exercise="plank">
+                <div class="card-icon">🧘</div>
+                <div class="card-text">
+                    <span class="card-name">Планка</span>
+                    <span class="card-desc">Удержание по таймеру</span>
+                </div>
+                <div class="card-chevron">›</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Workout Screen -->
+    <div id="screen-workout" class="screen">
+        <div class="workout-container">
+            <video id="camera-feed" autoplay playsinline muted></video>
+            <canvas id="pose-canvas"></canvas>
+
+            <!-- HUD -->
+            <div class="workout-hud">
+                <div class="hud-top">
+                    <div class="hud-left">
+                        <div id="hud-primary" class="hud-primary">0</div>
+                        <div id="hud-phase" class="hud-phase"></div>
+                    </div>
+                    <div class="hud-right">
+                        <div id="hud-timer" class="hud-timer">0:00</div>
+                        <div id="hud-quality-dot" class="hud-quality-dot"></div>
+                    </div>
+                </div>
+
+                <div id="hud-guidance" class="hud-guidance hidden"></div>
+
+                <div class="hud-bottom">
+                    <button id="btn-pause" class="btn-circle">
+                        <span id="pause-icon">⏸</span>
+                    </button>
+                    <button id="btn-stop" class="btn-stop">
+                        <span>⏹</span> Завершить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="screen-results" class="screen">
+        <div class="results-scroll">
+            <div class="results-header">
+                <h2>Тренировка завершена</h2>
+                <p id="results-subtitle"></p>
+            </div>
+            <div class="results-hero">
+                <div id="results-hero-value" class="hero-value"></div>
+                <div id="results-hero-label" class="hero-label"></div>
+            </div>
+            <div id="results-stats" class="stats-grid"></div>
+            <div id="results-form-dist" class="form-distribution"></div>
+            <div id="results-rep-list" class="rep-list-section"></div>
+            <button id="btn-new-workout" class="btn-primary">Новая тренировка</button>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
