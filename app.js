@@ -2,6 +2,9 @@ import { ExerciseType, PoseJoint, FormQuality } from './exercise-types.js';
 import { SquatAnalyzer } from './squat-analyzer.js';
 import { PushUpAnalyzer } from './pushup-analyzer.js';
 import { PlankAnalyzer } from './plank-analyzer.js';
+import { saveWorkoutWithRetry, flushUnsaved } from './api.js';
+import { showStatsScreen } from './stats-screen.js';
+import { showLeaderboardScreen } from './leaderboard-screen.js';
 
 // MediaPipe Tasks Vision landmark indices -> our PoseJoint
 const MP_INDEX_TO_JOINT = {
@@ -47,6 +50,10 @@ const MIN_FRAME_INTERVAL = 1000 / 15;
 const SMOOTHING_ALPHA = 0.4;
 const smoothedLandmarks = {};
 
+// Track if screens have been loaded
+let statsLoaded = false;
+let leaderboardLoaded = false;
+
 // ========== Init ==========
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -60,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set CSS variable for TG header offset
         const updateTgTop = () => {
             const top = tg.contentSafeAreaInset?.top || 0;
-            const headerHeight = tg.headerColor ? 0 : 0; // TG handles its own header
             document.documentElement.style.setProperty('--tg-top', `${top + 56}px`);
         };
         updateTgTop();
@@ -76,15 +82,28 @@ document.addEventListener('DOMContentLoaded', () => {
     canvasEl = document.getElementById('pose-canvas');
     canvasCtx = canvasEl.getContext('2d');
 
+    // Exercise cards
     document.querySelectorAll('.exercise-card').forEach(card => {
         card.addEventListener('click', () => startExercise(card.dataset.exercise));
     });
 
+    // Workout buttons
     document.getElementById('btn-pause').addEventListener('click', togglePause);
     document.getElementById('btn-stop').addEventListener('click', finishWorkout);
-    document.getElementById('btn-new-workout').addEventListener('click', backToMenu);
+    document.getElementById('btn-new-workout').addEventListener('click', () => navigateTo('menu'));
+
+    // Bottom navigation
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const screen = btn.dataset.screen;
+            navigateTo(screen);
+        });
+    });
 
     showScreen('menu');
+
+    // Flush any unsaved workouts from previous sessions
+    flushUnsaved();
 });
 
 // ========== Screen Navigation ==========
@@ -93,6 +112,42 @@ function showScreen(name) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(`screen-${name}`).classList.add('active');
     currentScreen = name;
+
+    // Show/hide bottom nav during workout
+    const nav = document.getElementById('bottom-nav');
+    if (name === 'workout') {
+        nav.classList.add('hidden');
+    } else {
+        nav.classList.remove('hidden');
+    }
+
+    // Update active nav button
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.querySelector(`.nav-btn[data-screen="${name}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+}
+
+function navigateTo(screen) {
+    if (screen === currentScreen) return;
+
+    showScreen(screen);
+
+    // Load data for screens on first visit
+    if (screen === 'stats' && !statsLoaded) {
+        statsLoaded = true;
+        showStatsScreen();
+    } else if (screen === 'stats') {
+        // Refresh stats each time
+        showStatsScreen();
+    }
+
+    if (screen === 'leaderboard' && !leaderboardLoaded) {
+        leaderboardLoaded = true;
+        showLeaderboardScreen();
+    } else if (screen === 'leaderboard') {
+        // Refresh leaderboard each time
+        showLeaderboardScreen();
+    }
 }
 
 function showLoading(show) {
@@ -396,7 +451,45 @@ function finishWorkout() {
         endedAt: Date.now(),
     };
 
+    // Save to server asynchronously
+    saveWorkoutToServer(result);
+
     showResults(result);
+}
+
+async function saveWorkoutToServer(result) {
+    const ex = result.exerciseType;
+
+    // Build payload matching server's insertWorkout() expectations
+    // Server reads: exerciseType (camelCase), totalDuration, startedAt, endedAt,
+    //   reps[].id, reps[].deepestAngle, reps[].depthPercent, reps[].formQuality, reps[].duration, reps[].timestamp
+    //   holds[].id, holds[].duration, holds[].averageQuality, holds[].timestamp
+    const payload = {
+        exerciseType: ex.key,
+        totalDuration: Math.round(result.totalDuration),
+        startedAt: result.startedAt,
+        endedAt: result.endedAt,
+        reps: (result.reps || []).map(r => ({
+            id: r.id,
+            deepestAngle: r.deepestAngle || 0,
+            depthPercent: r.depthPercent || 0,
+            formQuality: r.formQuality || 'poor',
+            duration: r.duration || 0,
+            timestamp: r.timestamp || 0,
+        })),
+        holds: (result.holds || []).map(h => ({
+            id: h.id,
+            duration: h.duration || 0,
+            averageQuality: h.averageQuality || 'unknown',
+            timestamp: h.timestamp || 0,
+        })),
+    };
+
+    try {
+        await saveWorkoutWithRetry(payload);
+    } catch (err) {
+        console.error('Failed to save workout:', err);
+    }
 }
 
 function stopCamera() {
@@ -528,12 +621,4 @@ function bestGoodStreak(reps) {
 function formatTime(seconds) {
     const t = Math.floor(seconds);
     return `${Math.floor(t / 60)}:${(t % 60).toString().padStart(2, '0')}`;
-}
-
-// ========== Back to Menu ==========
-
-function backToMenu() {
-    analyzer = null;
-    selectedExercise = null;
-    showScreen('menu');
 }

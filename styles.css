@@ -20,6 +20,8 @@
 
     /* Telegram Web App header offset — updated by JS */
     --tg-top: 0px;
+    /* Bottom nav height */
+    --nav-height: 64px;
 }
 
 html, body {
@@ -47,13 +49,85 @@ html, body {
     flex-direction: column;
 }
 
-/* ========== MENU ========== */
-
-#screen-menu {
-    padding: 20px;
-    padding-top: calc(var(--tg-top) + 12px);
+/* Generic scrollable area inside screens */
+.screen-scroll {
+    width: 100%;
+    flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    padding: 20px;
+    padding-top: calc(var(--tg-top) + 12px);
+    padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 16px);
+}
+
+/* Screen header */
+.screen-header {
+    margin-bottom: 16px;
+}
+
+.screen-header-title {
+    font-size: clamp(24px, 7vw, 32px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+/* ========== BOTTOM NAVIGATION ========== */
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: rgba(10, 10, 15, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 50;
+}
+
+.bottom-nav.hidden {
+    display: none;
+}
+
+.nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 16px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-family: inherit;
+    -webkit-appearance: none;
+    transition: color 0.2s;
+}
+
+.nav-btn.active {
+    color: var(--accent);
+}
+
+.nav-icon {
+    font-size: 22px;
+    line-height: 1.2;
+}
+
+.nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+/* ========== MENU ========== */
+
+#screen-menu .screen-scroll {
+    /* Menu uses the generic scroll */
 }
 
 .menu-header {
@@ -323,7 +397,7 @@ html, body {
     -webkit-overflow-scrolling: touch;
     padding: 20px;
     padding-top: calc(var(--tg-top) + 8px);
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+    padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 24px);
 }
 
 .results-header {
@@ -535,7 +609,291 @@ html, body {
     opacity: 0.85;
 }
 
-/* Loading state */
+/* ========== TAB ROWS ========== */
+
+.tab-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+}
+
+.tab-row::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-row-secondary {
+    margin-bottom: 16px;
+}
+
+.tab-btn {
+    padding: 7px 14px;
+    border-radius: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text-dim);
+    font-size: clamp(12px, 3.5vw, 14px);
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    -webkit-appearance: none;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+}
+
+.tab-btn:active {
+    opacity: 0.8;
+}
+
+.tab-content {
+    min-height: 200px;
+}
+
+/* ========== SECTION CARDS (Stats / Leaderboard) ========== */
+
+.section-card {
+    padding: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+}
+
+.section-title {
+    font-size: clamp(13px, 3.6vw, 15px);
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-bottom: 10px;
+}
+
+/* ========== HEATMAP ========== */
+
+.heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.heatmap-cell.low {
+    background: rgba(0, 222, 214, 0.2);
+}
+
+.heatmap-cell.mid {
+    background: rgba(0, 222, 214, 0.45);
+}
+
+.heatmap-cell.high {
+    background: rgba(0, 222, 214, 0.8);
+}
+
+/* ========== PERSONAL BESTS ========== */
+
+.pb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pb-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: clamp(13px, 3.6vw, 15px);
+}
+
+.pb-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.pb-value {
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ========== RECENT WORKOUTS ========== */
+
+.recent-workout-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.recent-workout-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.rw-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.rw-value {
+    font-size: clamp(14px, 4vw, 16px);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    min-width: 60px;
+}
+
+.rw-dots {
+    flex: 1;
+    display: flex;
+    gap: 3px;
+    align-items: center;
+}
+
+.rw-date {
+    font-size: clamp(11px, 3vw, 13px);
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.quality-mini {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.quality-mini.good { background: var(--green); }
+.quality-mini.acceptable { background: var(--yellow); }
+.quality-mini.poor { background: var(--red); }
+
+/* ========== LEADERBOARD ========== */
+
+.lb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.lb-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+}
+
+.lb-row-top {
+    background: rgba(0, 222, 214, 0.06);
+    border-color: rgba(0, 222, 214, 0.15);
+}
+
+.lb-row-me {
+    background: rgba(0, 222, 214, 0.1);
+    border-color: rgba(0, 222, 214, 0.3);
+}
+
+.lb-rank {
+    font-size: clamp(14px, 4vw, 17px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-dim);
+    min-width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.lb-row-top .lb-rank {
+    font-size: clamp(18px, 5vw, 22px);
+}
+
+.lb-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.lb-avatar-placeholder {
+    background: rgba(0, 222, 214, 0.2);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.lb-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.lb-name {
+    font-size: clamp(13px, 3.8vw, 15px);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lb-workouts {
+    font-size: clamp(11px, 3vw, 12px);
+    color: var(--text-dim);
+}
+
+.lb-value {
+    font-size: clamp(15px, 4.5vw, 18px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.lb-my-position {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+/* ========== EMPTY STATE ========== */
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+    font-size: clamp(14px, 4vw, 16px);
+    line-height: 1.5;
+}
+
+/* ========== LOADING (inline) ========== */
+
+.loading-inline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+/* Loading overlay */
 .loading-overlay {
     position: fixed;
     inset: 0;

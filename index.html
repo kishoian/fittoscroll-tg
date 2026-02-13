@@ -16,35 +16,37 @@
 
     <!-- Exercise Menu Screen -->
     <div id="screen-menu" class="screen active">
-        <div class="menu-header">
-            <h1 class="menu-title">FitToScroll</h1>
-            <p class="menu-subtitle">Выбери упражнение</p>
-        </div>
-        <div class="menu-cards">
-            <button class="exercise-card" data-exercise="squats">
-                <div class="card-icon">🏋️</div>
-                <div class="card-text">
-                    <span class="card-name">Приседания</span>
-                    <span class="card-desc">Детекция позы через камеру</span>
-                </div>
-                <div class="card-chevron">›</div>
-            </button>
-            <button class="exercise-card" data-exercise="pushUps">
-                <div class="card-icon">💪</div>
-                <div class="card-text">
-                    <span class="card-name">Отжимания</span>
-                    <span class="card-desc">Детекция позы через камеру</span>
-                </div>
-                <div class="card-chevron">›</div>
-            </button>
-            <button class="exercise-card" data-exercise="plank">
-                <div class="card-icon">🧘</div>
-                <div class="card-text">
-                    <span class="card-name">Планка</span>
-                    <span class="card-desc">Удержание по таймеру</span>
-                </div>
-                <div class="card-chevron">›</div>
-            </button>
+        <div class="screen-scroll">
+            <div class="menu-header">
+                <h1 class="menu-title">FitToScroll</h1>
+                <p class="menu-subtitle">Выбери упражнение</p>
+            </div>
+            <div class="menu-cards">
+                <button class="exercise-card" data-exercise="squats">
+                    <div class="card-icon">🏋️</div>
+                    <div class="card-text">
+                        <span class="card-name">Приседания</span>
+                        <span class="card-desc">Детекция позы через камеру</span>
+                    </div>
+                    <div class="card-chevron">›</div>
+                </button>
+                <button class="exercise-card" data-exercise="pushUps">
+                    <div class="card-icon">💪</div>
+                    <div class="card-text">
+                        <span class="card-name">Отжимания</span>
+                        <span class="card-desc">Детекция позы через камеру</span>
+                    </div>
+                    <div class="card-chevron">›</div>
+                </button>
+                <button class="exercise-card" data-exercise="plank">
+                    <div class="card-icon">🧘</div>
+                    <div class="card-text">
+                        <span class="card-name">Планка</span>
+                        <span class="card-desc">Удержание по таймеру</span>
+                    </div>
+                    <div class="card-chevron">›</div>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -98,6 +100,77 @@
             <button id="btn-new-workout" class="btn-primary">Новая тренировка</button>
         </div>
     </div>
+
+    <!-- Stats Screen -->
+    <div id="screen-stats" class="screen">
+        <div class="screen-scroll">
+            <div class="screen-header">
+                <h1 class="screen-header-title">Статистика</h1>
+            </div>
+
+            <!-- Period tabs -->
+            <div id="stats-period-tabs" class="tab-row">
+                <button class="tab-btn" data-value="today">День</button>
+                <button class="tab-btn active" data-value="week">Неделя</button>
+                <button class="tab-btn" data-value="month">Месяц</button>
+                <button class="tab-btn" data-value="all">Всё</button>
+            </div>
+
+            <!-- Exercise tabs -->
+            <div id="stats-exercise-tabs" class="tab-row tab-row-secondary">
+                <button class="tab-btn active" data-value="all">Все</button>
+                <button class="tab-btn" data-value="squats">🏋️</button>
+                <button class="tab-btn" data-value="pushUps">💪</button>
+                <button class="tab-btn" data-value="plank">🧘</button>
+            </div>
+
+            <!-- Content area -->
+            <div id="stats-content" class="tab-content"></div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Screen -->
+    <div id="screen-leaderboard" class="screen">
+        <div class="screen-scroll">
+            <div class="screen-header">
+                <h1 class="screen-header-title">Лидерборд</h1>
+            </div>
+
+            <!-- Exercise tabs -->
+            <div id="lb-exercise-tabs" class="tab-row">
+                <button class="tab-btn active" data-value="squats">🏋️ Присед</button>
+                <button class="tab-btn" data-value="pushUps">💪 Отжим.</button>
+                <button class="tab-btn" data-value="plank">🧘 Планка</button>
+            </div>
+
+            <!-- Period tabs -->
+            <div id="lb-period-tabs" class="tab-row tab-row-secondary">
+                <button class="tab-btn" data-value="today">День</button>
+                <button class="tab-btn active" data-value="week">Неделя</button>
+                <button class="tab-btn" data-value="month">Месяц</button>
+                <button class="tab-btn" data-value="all">Всё</button>
+            </div>
+
+            <!-- Content area -->
+            <div id="leaderboard-content" class="tab-content"></div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav id="bottom-nav" class="bottom-nav">
+        <button class="nav-btn active" data-screen="menu">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Тренировка</span>
+        </button>
+        <button class="nav-btn" data-screen="stats">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Статистика</span>
+        </button>
+        <button class="nav-btn" data-screen="leaderboard">
+            <span class="nav-icon">🏆</span>
+            <span class="nav-label">Лидерборд</span>
+        </button>
+    </nav>
 
     <script type="module" src="app.js"></script>
 </body>
