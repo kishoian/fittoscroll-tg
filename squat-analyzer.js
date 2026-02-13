@@ -78,10 +78,10 @@ export class SquatAnalyzer {
 
         switch (this.phase) {
             case Phase.notReady:
-                if (kneeAngle >= 150) { this.phase = Phase.standing; this._resetAccum(); }
+                if (kneeAngle >= 148) { this.phase = Phase.standing; this._resetAccum(); }
                 break;
             case Phase.standing:
-                if (kneeAngle < 140) {
+                if (kneeAngle < 145) {
                     this.phase = Phase.descending;
                     this._repStartTime = now;
                     this._deepestAngle = kneeAngle;
@@ -90,15 +90,15 @@ export class SquatAnalyzer {
                 }
                 break;
             case Phase.descending:
-                if (kneeAngle <= 130) this.phase = Phase.bottom;
+                if (kneeAngle <= 135) this.phase = Phase.bottom;
                 else if (kneeAngle >= 150) { this.phase = Phase.standing; this._resetAccum(); }
                 break;
             case Phase.bottom:
-                if (kneeAngle >= 135) this.phase = Phase.ascending;
+                if (kneeAngle >= 138) this.phase = Phase.ascending;
                 break;
             case Phase.ascending:
-                if (kneeAngle >= 150) {
-                    if (this._deepestAngle <= 130 && (now - this._lastRepTs) >= 400) {
+                if (kneeAngle >= 148) {
+                    if (this._deepestAngle <= 138 && (now - this._lastRepTs) >= 300) {
                         this.repCount++;
                         this._lastRepTs = now;
                         const duration = this._repStartTime ? (now - this._repStartTime) / 1000 : 0;
@@ -113,7 +113,7 @@ export class SquatAnalyzer {
                     }
                     this.phase = Phase.standing;
                     this._resetAccum();
-                } else if (kneeAngle <= 125) {
+                } else if (kneeAngle <= 130) {
                     this.phase = Phase.bottom;
                 }
                 break;
@@ -180,8 +180,10 @@ export class SquatAnalyzer {
     }
 
     _smooth(value) {
-        const alpha = 0.3;
         if (this._smoothedKnee === null) { this._smoothedKnee = value; return value; }
+        // Use higher alpha when angle changes fast (fast reps)
+        const diff = Math.abs(value - this._smoothedKnee);
+        const alpha = diff > 10 ? 0.6 : 0.35;
         const next = this._smoothedKnee * (1 - alpha) + value * alpha;
         this._smoothedKnee = next;
         return next;

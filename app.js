@@ -173,6 +173,15 @@ async function startExercise(key) {
     // Reset smoothing buffer
     for (const key of Object.keys(smoothedLandmarks)) delete smoothedLandmarks[key];
 
+    // Lock landscape for push-ups and plank
+    if (key === 'pushUps' || key === 'plank') {
+        try {
+            await screen.orientation?.lock?.('landscape');
+        } catch (e) {
+            // Orientation lock not supported — that's ok
+        }
+    }
+
     showScreen('workout');
     document.getElementById('hud-primary').textContent = selectedExercise.isRepBased ? '0' : '0:00';
     document.getElementById('hud-phase').textContent = '';
@@ -445,6 +454,11 @@ function finishWorkout() {
     if (lastResumeTime) totalDuration += (Date.now() - lastResumeTime) / 1000;
 
     stopCamera();
+
+    // Unlock orientation
+    try {
+        screen.orientation?.unlock?.();
+    } catch (e) { /* ignore */ }
 
     const result = {
         exerciseType: selectedExercise,
