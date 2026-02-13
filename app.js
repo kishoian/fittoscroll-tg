@@ -66,16 +66,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Set CSS variable for TG header offset
         const updateTgTop = () => {
-            const top = tg.contentSafeAreaInset?.top || 0;
-            document.documentElement.style.setProperty('--tg-top', `${top + 56}px`);
+            // Try contentSafeAreaInset first, then safeAreaInset, then fallback
+            const contentTop = tg.contentSafeAreaInset?.top || 0;
+            const safeTop = tg.safeAreaInset?.top || 0;
+            // Total offset = device safe area + Telegram header (~56px)
+            const totalTop = contentTop + safeTop + 56;
+            document.documentElement.style.setProperty('--tg-top', `${totalTop}px`);
         };
         updateTgTop();
         tg.onEvent('viewportChanged', updateTgTop);
+        tg.onEvent('safeAreaChanged', updateTgTop);
+        tg.onEvent('contentSafeAreaChanged', updateTgTop);
     } else {
-        // Not in Telegram — use safe area insets
-        document.documentElement.style.setProperty('--tg-top',
-            `max(${getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-top)') || '0px'}, 16px)`
-        );
+        // Not in Telegram — use fixed offset
+        document.documentElement.style.setProperty('--tg-top', '16px');
     }
 
     videoEl = document.getElementById('camera-feed');
