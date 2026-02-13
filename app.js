@@ -2,7 +2,7 @@ import { ExerciseType, PoseJoint, FormQuality } from './exercise-types.js';
 import { SquatAnalyzer } from './squat-analyzer.js';
 import { PushUpAnalyzer } from './pushup-analyzer.js';
 import { PlankAnalyzer } from './plank-analyzer.js';
-import { saveWorkoutWithRetry, flushUnsaved } from './api.js';
+import { saveWorkoutWithRetry, flushUnsaved } from './fts-api.js';
 import { showStatsScreen } from './stats-screen.js';
 import { showLeaderboardScreen } from './leaderboard-screen.js';
 

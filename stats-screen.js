@@ -1,4 +1,4 @@
-import { api } from './api.js';
+import { api } from './fts-api.js';
 
 let currentPeriod = 'week';
 let currentExercise = 'all';
