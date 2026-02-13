@@ -43,6 +43,10 @@ let timerInterval = null;
 let lastFrameTime = 0;
 const MIN_FRAME_INTERVAL = 1000 / 15;
 
+// Smoothing buffer for landmark positions
+const SMOOTHING_ALPHA = 0.4;
+const smoothedLandmarks = {};
+
 // ========== Init ==========
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -106,6 +110,9 @@ async function startExercise(key) {
         case 'pushUps': analyzer = new PushUpAnalyzer(); break;
         case 'plank':   analyzer = new PlankAnalyzer(); break;
     }
+
+    // Reset smoothing buffer
+    for (const key of Object.keys(smoothedLandmarks)) delete smoothedLandmarks[key];
 
     showScreen('workout');
     document.getElementById('hud-primary').textContent = selectedExercise.isRepBased ? '0' : '0:00';
@@ -171,13 +178,13 @@ async function initPoseLandmarker() {
 
     poseLandmarker = await PoseLandmarker.createFromOptions(filesetResolver, {
         baseOptions: {
-            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
+            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task',
             delegate: 'GPU',
         },
         runningMode: 'VIDEO',
         numPoses: 1,
-        minPoseDetectionConfidence: 0.5,
-        minPosePresenceConfidence: 0.5,
+        minPoseDetectionConfidence: 0.6,
+        minPosePresenceConfidence: 0.6,
         minTrackingConfidence: 0.5,
     });
 }
@@ -205,8 +212,21 @@ function startDetectionLoop() {
 
                 for (const [mpIdx, joint] of Object.entries(MP_INDEX_TO_JOINT)) {
                     const lm = landmarks[parseInt(mpIdx)];
-                    if (lm && lm.visibility > 0.35) {
-                        points[joint] = { x: lm.x, y: lm.y };
+                    if (lm && lm.visibility > 0.5) {
+                        // Smooth coordinates to reduce jitter
+                        const raw = { x: lm.x, y: lm.y };
+                        if (smoothedLandmarks[joint]) {
+                            smoothedLandmarks[joint] = {
+                                x: smoothedLandmarks[joint].x * (1 - SMOOTHING_ALPHA) + raw.x * SMOOTHING_ALPHA,
+                                y: smoothedLandmarks[joint].y * (1 - SMOOTHING_ALPHA) + raw.y * SMOOTHING_ALPHA,
+                            };
+                        } else {
+                            smoothedLandmarks[joint] = raw;
+                        }
+                        points[joint] = { ...smoothedLandmarks[joint] };
+                    } else {
+                        // Clear smoothing if landmark lost
+                        delete smoothedLandmarks[joint];
                     }
                 }
 
@@ -214,6 +234,8 @@ function startDetectionLoop() {
                 updateHUD(metrics);
                 drawPose(points);
             } else {
+                // Clear all smoothing on body loss
+                for (const key of Object.keys(smoothedLandmarks)) delete smoothedLandmarks[key];
                 updateHUD(null);
                 drawPose(null);
             }

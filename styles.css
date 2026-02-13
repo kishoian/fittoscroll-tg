@@ -263,7 +263,7 @@ html, body {
     display: flex;
     gap: 12px;
     align-items: center;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
 }
 
 .btn-circle {
